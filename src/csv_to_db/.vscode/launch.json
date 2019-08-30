@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - csv_to_db",
+            "request": "launch",
+            "mainClass": "app.csv_to_db",
+            "projectName": "csv_to_db"
+        }
+    ]
+}
