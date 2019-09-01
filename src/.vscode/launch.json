@@ -4,6 +4,13 @@
             "type": "java",
             "name": "CodeLens (Launch) - App",
             "request": "launch",
+            "mainClass": "com.mycompany.cvToDb.App",
+            "projectName": "cv_to_db"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - App",
+            "request": "launch",
             "mainClass": "App",
             "projectName": "777"
         }
