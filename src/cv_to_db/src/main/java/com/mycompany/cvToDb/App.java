@@ -5,8 +5,6 @@ import java.io.IOException;
 
 import com.opencsv.CSVReader;
 
-import java.sql.*;
-
 /**
  * Hello world!
  */
@@ -21,11 +19,17 @@ public final class App {
      */
     public static void main(String[] args) {
         try {
-            readDataLineByLine("/home/axel/Desktop/ms3_coding_challenge/doc/ms3Interview.csv");
+            readDataLineByLine("/mnt/c/Users/AxelE/Desktop/ms3_coding_challenge/doc/ms3Interview.csv");
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+
+
+    public boolean checkNotEmpty(String data) {
+
+        return data != "";
     }
 
     public static void readDataLineByLine(String file) throws IOException {
@@ -48,6 +52,15 @@ public final class App {
             while ((nextRecord = csvReader.readNext()) != null) {
                 // for (String cell : nextRecord) {
                 System.out.print(nextRecord[0]);
+                System.out.print(nextRecord[1]);
+                System.out.print(nextRecord[2]);
+                System.out.print(nextRecord[3]);
+                System.out.print(nextRecord[4]);
+                System.out.print(nextRecord[5]);
+                System.out.print(nextRecord[6]);
+                System.out.print(nextRecord[7]);
+                System.out.print(nextRecord[8]);
+                System.out.print(nextRecord[9]);
                 // }
                 System.out.println();
             }
@@ -62,21 +75,5 @@ public final class App {
                 csvReader.close();
 
         }
-    }
-
-    public class SQLiteJDBC {
-
-        Connection c = null;
-
-        try
-        {
-            Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:test.db");
-        }catch(
-        Exception e)
-        {
-            System.err.println(e.getClass().getName() + ": " + e.getMessage());
-            System.exit(0);
-        }System.out.println("Opened database successfully");
     }
 }
