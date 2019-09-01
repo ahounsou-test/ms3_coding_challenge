@@ -79,4 +79,4 @@ public final class App {
             System.exit(0);
         }System.out.println("Opened database successfully");
     }
-}}
+}
