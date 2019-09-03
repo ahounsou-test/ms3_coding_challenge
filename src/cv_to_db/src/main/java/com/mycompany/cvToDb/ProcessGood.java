@@ -21,21 +21,28 @@ public class ProcessGood implements Runnable {
     public void run() {
         db.connect();
         db.createTable(filename);
+        db.prepareForTable(filename);
         writeDataToDb();
     }
 
     private void writeDataToDb() {
 
         String[] record;
-        /* Get rid of header */
+       
         try {
+             /* Get rid of header */
             if (!goodRecordQueue.isEmpty())
                 goodRecordQueue.take();
 
             while (!goodRecordQueue.isEmpty() || !control.finishedProcessing) {
                 record = goodRecordQueue.take();
-                db.addToDB(filename, record);
+                System.out.println("goodQueue " + goodRecordQueue.remainingCapacity());
+                db.batchInsertion(record, 1000);
             }
+
+            db.flushBatch();
+            db.closeConn();
+
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
