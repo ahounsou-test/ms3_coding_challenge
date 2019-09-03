@@ -1,25 +1,37 @@
 package com.mycompany.cvToDb;
 
+import java.io.File;
 import java.sql.*;
-import java.util.ArrayList;
 
 public class SQLiteJDBC {
 
-   Connection conn = null;
+   private Connection conn = null;
+   private final String pathToDb = "." + File.separator + " db" + File.separator;
+   private String dbname;
 
-   SQLiteJDBC() {
+   SQLiteJDBC(String dbname) {
+
+      this.dbname = dbname;
+   }
+
+   public void connect(){
 
       try {
+       
+         String dbPath = pathToDb + dbname + ".db";
          Class.forName("org.sqlite.JDBC");
-         conn = DriverManager.getConnection("jdbc:sqlite:test.db");
+
+         File file = new File(dbPath);
+         file.getParentFile().mkdirs();
+         conn = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+
       } catch (Exception e) {
          System.err.println(e.getClass().getName() + ": " + e.getMessage());
          System.exit(0);
       }
-      System.out.println("Opened database successfully");
+
 
    }
-
    public Boolean createTable(String tablename) {
 
       String sql = "CREATE TABLE IF NOT EXISTS " + tablename + "(\n" + "    id integer PRIMARY KEY,\n"
@@ -59,6 +71,5 @@ public class SQLiteJDBC {
          return false;
       }
       return true;
-
    }
 }
