@@ -1,5 +1,6 @@
 package com.mycompany.cvToDb;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
@@ -20,12 +21,18 @@ public class ProcessAll implements Runnable {
     private long badRecordProcessed = 0;
     private long receivedRecordProcessed = 0;
 
+    private Control control = null;
+
     private final int GOODRECORDBOOL = 0x3FF;
 
-    ProcessAll(String filename, BlockingQueue<String[]> goodRecord, BlockingQueue<String[]> BadRecord) {
+    private final String PATHTOLOG = "." + File.separator + "output" + File.separator + "log" + File.separator;
+
+    ProcessAll(String filename, BlockingQueue<String[]> goodRecord, BlockingQueue<String[]> BadRecord,
+            Control control) {
         this.badRecordQueue = BadRecord;
         this.goodRecordQueue = goodRecord;
         this.filename = filename;
+        this.control = control;
     }
 
     @Override
@@ -38,7 +45,7 @@ public class ProcessAll implements Runnable {
             writeLog(name);
         } catch (IOException e) {
 
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         }
     }
 
@@ -51,42 +58,47 @@ public class ProcessAll implements Runnable {
      */
     private void writeLog(String filename) throws IOException {
 
-        String path = "." + File.separator +  "output" + File.separator +" log" + File.separator;
+        String pathToFile = PATHTOLOG + filename + ".log";
+        try {
+            File file = new File(pathToFile);
+            file.getParentFile().mkdirs();
 
-        String pathToFile = path + filename + ".log";
+            BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+            PrintWriter printWriter = new PrintWriter(writer);
 
-        File file = new File(pathToFile);
-        file.getParentFile().mkdirs();
+            printWriter.printf("Record received: %d\n", receivedRecordProcessed);
+            printWriter.printf("Good record received: %d\n", goodRecordProcessed);
+            printWriter.printf("Bad record received: %d\n", badRecordProcessed);
 
-        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-        PrintWriter printWriter = new PrintWriter(writer);
+            printWriter.close();
 
-        printWriter.printf("Record received: %l\n", receivedRecordProcessed);
-        printWriter.printf("Good record received: %l\n", goodRecordProcessed);
-        printWriter.printf("Bad record received: %l\n", badRecordProcessed);
-
-        printWriter.close();
-
+        } catch (NullPointerException e) {
+            System.err.println(e.getMessage());
+        }
+        System.out.println("Finished processing write to log");
     }
 
     private void processFile() throws IOException {
 
         FileReader filereader = null;
         CSVReader csvReader = null;
+        BufferedReader reader = null;
 
         int boolCheckRecord = 0x0;
 
+        String[] nextRecord;
+
+        filereader = new FileReader(filename);
+        reader = new BufferedReader(filereader);
+
+        csvReader = new CSVReader(reader);
+
+        // we are going to read data line by line
         try {
-
-            String[] nextRecord;
-
-            filereader = new FileReader(filename);
-            csvReader = new CSVReader(filereader);
-
-            // we are going to read data line by line
-            while ((nextRecord = csvReader.readNext()) != null) {
+            while ((nextRecord = csvReader.readNext()) != null && nextRecord.length != 0) {
                 receivedRecordProcessed++;
-
+                boolCheckRecord = 0x0000;
+                
                 if (checkNotEmpty(nextRecord[0]))
                     boolCheckRecord = boolCheckRecord | 0x0001;
                 if (checkNotEmpty(nextRecord[1]))
@@ -105,28 +117,36 @@ public class ProcessAll implements Runnable {
                     boolCheckRecord = boolCheckRecord | 0x0080;
                 if (checkNotEmpty(nextRecord[8]))
                     boolCheckRecord = boolCheckRecord | 0x0100;
-                if (checkNotEmpty(nextRecord[8]))
+                if (checkNotEmpty(nextRecord[9]))
                     boolCheckRecord = boolCheckRecord | 0x0200;
 
-                if (boolCheckRecord == GOODRECORDBOOL) {
-                    goodRecordProcessed++;
-                    goodRecordQueue.add(nextRecord);
-                } else {
-                    badRecordProcessed++;
-                    badRecordQueue.add(nextRecord);
+                if(receivedRecordProcessed == 6001)
+                    System.out.println();
+                try {
+
+                    if (boolCheckRecord == GOODRECORDBOOL) {
+                        goodRecordProcessed++;
+                        goodRecordQueue.put(nextRecord);
+                    } else {
+                        badRecordProcessed++;
+                        badRecordQueue.put(nextRecord);
+                    }
+
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (NullPointerException | IndexOutOfBoundsException e) {
+           // System.err.println(e.getClass().getName() + "\n" + e.getMessage());
+           e.printStackTrace();
         } finally {
-
-            if (filereader != null)
-                filereader.close();
 
             if (csvReader != null)
                 csvReader.close();
-
         }
+        /* set finished processing to true */
+        control.finishedProcessing = true;
+        System.out.println("Finished processing record");
     }
 
     /**
@@ -134,8 +154,8 @@ public class ProcessAll implements Runnable {
      * @param data The string to check. return true is string is not equal ""
      */
     private boolean checkNotEmpty(String data) {
-
-        return data != "";
+       
+        return !data.isBlank();
     }
 
     /**

@@ -1,9 +1,7 @@
 package com.mycompany.cvToDb;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import com.opencsv.CSVReader;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * Hello world!
@@ -11,120 +9,36 @@ import com.opencsv.CSVReader;
 public final class App {
     private App() {
     }
-
     /**
-     * 
      * @param args The arguments of the program.
      */
     public static void main(String[] args) {
 
+        BlockingQueue<String[]> goodRecordQueue = new LinkedBlockingQueue<String[]>(5000);
+        BlockingQueue<String[]> badRecordQueue = new LinkedBlockingQueue<String[]>(1000);
+        Control control = new Control();
+        String filename = "/mnt/c/Users/AxelE/Desktop/ms3_coding_challenge/doc/ms3Interview.csv";
 
+        ProcessAll processAllRecord = new ProcessAll(filename, goodRecordQueue, badRecordQueue, control);
+        ProcessGood processGoodRecord = new ProcessGood(filename, goodRecordQueue, control);
+        ProcessBad processBadRecord = new ProcessBad(filename, badRecordQueue, control);
 
-        try {
-            processFile("/mnt/c/Users/AxelE/Desktop/ms3_coding_challenge/doc/ms3Interview.csv");
+        Thread allRecordProcessingThread = new Thread(processAllRecord, "All Record");
+        Thread goodRecordProcessingThread = new Thread(processGoodRecord, "Good Record");
+        Thread badRecordProcessingThread = new Thread(processBadRecord, "Bad Record");
 
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    /**
-     * 
-     * @param data The string to check. return true is string is not equal ""
-     */
-    public boolean checkNotEmpty(String data) {
-
-        return data != "";
-    }
-
-    /**
-     * 
-     * @param file The path or name of csv file to check.
-     * 
-     *             read csv file and save data in a db name <csvfilename>.db
-     */
-    public static void processFile(String file) throws IOException {
-
-        FileReader filereader = null;
-        CSVReader csvReader = null;
-        String filename; 
-        SQLiteJDBC db;
-        long goodRecord = 0;
-        long badRecord = 0;
-        long receivedRecord = 0;
+        allRecordProcessingThread.start();
+        goodRecordProcessingThread.start();
+        badRecordProcessingThread.start();
 
         try {
+            allRecordProcessingThread.join();
+            goodRecordProcessingThread.join();
+            badRecordProcessingThread.join();
 
-            // Create an object of filereader
-            // class with CSV file as a parameter.
-            filereader = new FileReader(file);
-            filename = getfileName(file);
-
-            // create csvReader object passing
-            // file reader as a parameter
-            csvReader = new CSVReader(filereader);
-
-            db = new SQLiteJDBC();
-            String[] nextRecord;
-
-            // we are going to read data line by line
-            while ((nextRecord = csvReader.readNext()) != null) {
-                receivedRecord++;
-                System.out.print(receivedRecord);
-                System.out.print(" ");
-                System.out.print(nextRecord[0]);
-                System.out.print(" ");
-                System.out.print(nextRecord[1]);
-                System.out.print(" ");
-                System.out.print(nextRecord[2]);
-                System.out.print(" ");
-                System.out.print(" ");
-                System.out.print(nextRecord[3]);
-                System.out.print(" ");
-                System.out.print(nextRecord[4]);
-                System.out.print(" ");
-                System.out.print(nextRecord[5]);
-                System.out.print(" ");
-                System.out.print(nextRecord[6]);
-                System.out.print(" ");
-                System.out.print(nextRecord[7]);
-                System.out.print(" ");
-                System.out.print(nextRecord[8]);
-                System.out.print(" ");
-                System.out.print(nextRecord[9]);
-                System.out.println();
-
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-
-            if (filereader != null)
-                filereader.close();
-
-            if (csvReader != null)
-                csvReader.close();
-
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
-   
-    /**
-     * 
-     * @param path The path to the file ""
-     * 
-     * @return   the  name of the file without extention
-     */
 
-    public static String getfileName(String path) {
-
-        File userFile = new File(path);
-        String filename = userFile.getName();
-
-        int pos = filename.lastIndexOf(".");
-        if (pos > 0) {
-            filename = filename.substring(0, pos);
-        }
-
-        return filename;
-    }
 }

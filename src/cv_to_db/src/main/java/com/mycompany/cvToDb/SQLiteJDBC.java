@@ -6,7 +6,7 @@ import java.sql.*;
 public class SQLiteJDBC {
 
    private Connection conn = null;
-   private final String pathToDb = "." + File.separator + " db" + File.separator;
+   private final String PATHTODB = "." + File.separator + "db" + File.separator;
    private String dbname;
 
    SQLiteJDBC(String dbname) {
@@ -18,26 +18,24 @@ public class SQLiteJDBC {
 
       try {
        
-         String dbPath = pathToDb + dbname + ".db";
+         String dbPath = PATHTODB + dbname + ".db";
          Class.forName("org.sqlite.JDBC");
 
          File file = new File(dbPath);
          file.getParentFile().mkdirs();
          conn = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
 
-      } catch (Exception e) {
+      } catch (SQLException | ClassNotFoundException e) {
          System.err.println(e.getClass().getName() + ": " + e.getMessage());
          System.exit(0);
       }
-
-
    }
    public Boolean createTable(String tablename) {
 
       String sql = "CREATE TABLE IF NOT EXISTS " + tablename + "(\n" + "    id integer PRIMARY KEY,\n"
             + "    A text NOT NULL,\n" + "    B text NOT NULL,\n" + "    C text NOT NULL,\n" + "    D text NOT NULL,\n"
             + "    E Blob NOT NULL,\n" + "    F text NOT NULL,\n" + "    G text NOT NULL,\n" + "    H text NOT NULL,\n"
-            + "    I text NOT NULL,\n" + "    J text NOT NULL,\n" + ");";
+            + "    I text NOT NULL,\n" + "    J text NOT NULL\n" + ");";
 
       try (Statement stmt = conn.createStatement()) {
          // create a new table
@@ -70,6 +68,8 @@ public class SQLiteJDBC {
          System.out.println(e.getMessage());
          return false;
       }
+
+      
       return true;
    }
 }

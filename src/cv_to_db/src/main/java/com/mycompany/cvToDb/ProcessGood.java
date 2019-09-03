@@ -6,16 +6,17 @@ import java.util.concurrent.BlockingQueue;
 public class ProcessGood implements Runnable {
 
     private BlockingQueue<String[]> goodRecordQueue;
-    private SQLiteJDBC db ; 
-    private boolean tableCreated = false;
+    private SQLiteJDBC db;
     private String filename;
-    
-    ProcessGood(String filename, BlockingQueue<String[]> goodRecord) {
+    private Control control = null;
+
+    ProcessGood(String filename, BlockingQueue<String[]> goodRecord, Control control) {
         this.goodRecordQueue = goodRecord;
         this.filename = getfileName(filename);
-        this.db = new SQLiteJDBC(filename);
+        this.db = new SQLiteJDBC(this.filename);
+        this.control = control;
     }
-    
+
     @Override
     public void run() {
         db.connect();
@@ -23,17 +24,22 @@ public class ProcessGood implements Runnable {
         writeDataToDb();
     }
 
-    private void writeDataToDb(){
+    private void writeDataToDb() {
 
         String[] record;
         /* Get rid of header */
-        if (!goodRecordQueue.isEmpty())
-            goodRecordQueue.remove();
+        try {
+            if (!goodRecordQueue.isEmpty())
+                goodRecordQueue.take();
 
-        while( !goodRecordQueue.isEmpty()) {
-            record = goodRecordQueue.remove();
-            db.addToDB(filename, record);
-        }   
+            while (!goodRecordQueue.isEmpty() || !control.finishedProcessing) {
+                record = goodRecordQueue.take();
+                db.addToDB(filename, record);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        System.out.println("Finished processing good record");
     }
 
     /**
@@ -55,6 +61,4 @@ public class ProcessGood implements Runnable {
         return filename;
     }
 
-
-    
 }
