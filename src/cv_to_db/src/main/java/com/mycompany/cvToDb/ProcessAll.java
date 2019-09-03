@@ -51,16 +51,19 @@ public class ProcessAll implements Runnable {
      */
     private void writeLog(String filename) throws IOException {
 
-        String path = "../output/log/";
+        String path = "." + File.separator +  "output" + File.separator +" log" + File.separator;
 
         String pathToFile = path + filename + ".log";
 
-        BufferedWriter writer = new BufferedWriter(new FileWriter(pathToFile));
+        File file = new File(pathToFile);
+        file.getParentFile().mkdirs();
+
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
         PrintWriter printWriter = new PrintWriter(writer);
 
-        printWriter.printf("Record received:  %l \n", receivedRecordProcessed);
-        printWriter.printf("Good record received:  %l \n", goodRecordProcessed);
-        printWriter.printf("Bad record received:  %l \n", badRecordProcessed);
+        printWriter.printf("Record received: %l\n", receivedRecordProcessed);
+        printWriter.printf("Good record received: %l\n", goodRecordProcessed);
+        printWriter.printf("Bad record received: %l\n", badRecordProcessed);
 
         printWriter.close();
 
