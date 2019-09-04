@@ -9,6 +9,7 @@ How to run the program:
     Note: All data in write to an output folder in the project directory
 
  Design Choice:
+ 
     - A container class for data: Store the data read from the file and a sentinel      to indicate data processing is completed
 
     - A class to process file: 
