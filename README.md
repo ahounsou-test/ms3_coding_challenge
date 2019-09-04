@@ -1,15 +1,15 @@
 
-#H4 Summary:
+# Summary:
     Maven project that process a csv file. Write the row with 10 column to an sqlite database name <input-filename>.db and the row with less to a csv file name <input-filename>-bad.csv. The number of total process row, row with 10 column and the number of row with less  is written to a log file
 
-#H1 How to run the program:
+# How to run the program:
     Run this command from the root of the project:
 
         mvn -e exec:java -Dexec.mainClass=com.mycompany.cvToDb.App -f cv_to_db/pom.xml -Dexec.args="<path to csv file>"
 
     Note: All data in write to an output folder in the project directory
 
- #H1 Design Choice:
+# Design Choice:
 
     - A container class for data: Store the data read from the file and a sentinel      to indicate data processing is completed
 
@@ -26,7 +26,7 @@
         Allow creation and insertion of data into a database
 
 
-#H1 Assumption made base on requirement:
+#H1Assumption made base on requirement:
     - Every row in the project will have 10 column
     - The name of the column in the db is not important
     - Name of the database is <input-filename>.db
