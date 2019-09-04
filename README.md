@@ -9,10 +9,11 @@
 # How to run the program:
     Run these command from the cv_to_db directory:
         first built:
-            - mvn compile
+            mvn compile
         next:
-            mvn exec:java -Dexec.mainClass=com.mycompany.cvToDb.App -f \
-        pom.xml -Dexec.args="<path to csv file>"
+            mvn install
+        finally:
+            mvn exec:java -Dexec.mainClass=com.mycompany.cvToDb.App -f pom.xml -Dexec.args="<path to csv file>"
 
     Note: All data is written to an output folder in the project directory
 
