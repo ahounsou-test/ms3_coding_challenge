@@ -1,6 +1,6 @@
 
 # Summary:
-    Maven project that process a csv file. Write the row with 10 column to an sqlite database name <input-filename>.db and the row with less to a csv file name <input-filename>-bad.csv. The number of total process row, row with 10 column and the number of row with less  is written to a log file
+Maven project that process a csv file. Write the row with 10 column to an sqlite database name <input-filename>.db and the row with less to a csv file name <input-filename>-bad.csv. The number of total process row, row with 10 column and the number of row with less  is written to a log file
 
 # How to run the program:
     Run this command from the root of the project:
