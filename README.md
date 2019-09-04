@@ -7,10 +7,12 @@
     to a log file
 
 # How to run the program:
-    Run this command from the root of the project:
-
-        mvn -e exec:java -Dexec.mainClass=com.mycompany.cvToDb.App -f \
-        cv_to_db/pom.xml -Dexec.args="<path to csv file>"
+    Run these command from the cv_to_db directory:
+        first built:
+            - mvn compile
+        next:
+            mvn exec:java -Dexec.mainClass=com.mycompany.cvToDb.App -f \
+        pom.xml -Dexec.args="<path to csv file>"
 
     Note: All data is written to an output folder in the project directory
 
